@@ -99,12 +99,24 @@ function render(){
   switch (state.page){
     case 'login':
       containerBox.innerHTML = loginPage
+      // initial buttons for login and to see register form
+      const buttons = document.getElementsByClassName("btn btn-info btn-md")
+      const registerMenu = buttons.register
+      const loginButton = buttons.login
+      loginButton.addEventListener("click", (e) => loginFormHandler(e))
+      registerMenu.addEventListener("click", (e) => registerFormAdder(e))
     break; 
     case 'register':
       containerBox.innerHTML = registerPage
     break;
     case 'profile':
       containerBox.innerHTML = profilePage
+      const logoutButton = document.getElementById('logout')
+      logoutButton.addEventListener("click", function (){
+        sessionStorage.clear()
+        state.page = "login" 
+        render()
+      })
     break;
   }
 }
@@ -116,16 +128,6 @@ if (!!parseInt(sessionStorage.currentUserId)){
 }
 
 
-// initial buttons for login and to see register form
-const buttons = document.getElementsByClassName("btn btn-info btn-md")
-const registerMenu = buttons.register
-const loginButton = buttons.login
-
-
-
-
-// handles logging in
-loginButton.addEventListener("click", (e) => loginFormHandler(e))
 // gets values of login form
 function loginFormHandler(e) {
     e.preventDefault()
@@ -152,19 +154,20 @@ function loginFetch(email, password){
       console.log(json)
       state.page = "profile"
       render()
-      let logoutButton = document.getElementById('logout')
-      return logoutButton.addEventListener("click", function (){
-        sessionStorage.currentUserId = 0
+      logoutButton = document.getElementById('logout')
+      logoutButton.addEventListener("click", function (){
+        sessionStorage.clear()
         state.page = "login" 
         render()
       })
+      return user = json 
     }
   })
 }
 
 // creating new users
 //listens for register button to be clicked to render register form
-registerMenu.addEventListener("click", (e) => registerFormAdder(e))
+
 function registerFormAdder(e) {
     e.preventDefault()
   state.page = 'register'
@@ -200,19 +203,24 @@ function registerFetch(email, password, owner, petName, age, about, breed, size,
     age: age
     }
   }
+  // create user in backend
   fetch("http://localhost:3000/api/v1/users", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(userData)})
-    .then(response => response.json())
-    .then(json => {
-    sessionStorage.currentUserId = json.id
-    state.page = "profile"
-    render()
-    let logoutButton = document.getElementById('logout')
-    return logoutButton.addEventListener("click", () => sessionStorage.currentUserId = 0)
+  .then(response => response.json())
+  .then(json => {
+    if (json.id){
+      sessionStorage.currentUserId = json.id
+      state.page = "profile"
+      render()
+      logoutButton = document.getElementById('logout')
+      logoutButton.addEventListener("click", function (){
+        sessionStorage.clear()
+        state.page = "login" 
+        render()
+      })
+      return user = json 
+    }
   })
 }
-
-
-
