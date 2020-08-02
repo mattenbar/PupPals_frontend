@@ -1,10 +1,12 @@
 // main box where i want to display data
 const containerBox = document.getElementById('container-box')
+const usersUrl = "http://localhost:3000/api/v1/users/"
+
 
 // set switch statement to start on login page
 let state = {page: "login" }
 
-// code for login page
+// html for login page
 let loginPage = `
   <br>
   <div id="loginDiv">
@@ -28,7 +30,7 @@ let loginPage = `
 // initial call to render page
 render()
 
-// code for register page
+// html for register page
 let registerPage =`
   <br>
   <form id="register-form" class="form" action="" method="post">
@@ -84,48 +86,110 @@ let registerPage =`
     </div>
   </form>
 `
-// code for user profile
-let profilePage = `
-  <br>
-  <h1> Testing </h1>
+// html for user profile
+function profilePage(){
+  displayCard = document.getElementById("display-card")
+
+  displayCard.innerHTML +=`
+  <div class="profile-card" id="profile-card">
+    <br>
+    <h1> ${capitalize(user.owner)}'s Profile </h1>
+    <img class="card-img-top" src="https://scontent-lga3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/116266925_152033579835041_6801224975812712869_n.jpg?_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=105&_nc_ohc=8su9FYI7zr8AX-EjwNO&oh=245a0859f445c893326b39d2be1480bf&oe=5F4BFCEA">
+    <div class="card-body">
+      <h5 class="card-title">Pup's Name: ${capitalize(user.pet_name)}</h5>
+      <p class="card-text">${user.about}</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">Breed: ${capitalize(user.breed)}</li>
+      <li class="list-group-item">Age: ${user.age}</li>
+      <li class="list-group-item">Size: ${capitalize(user.size)}</li>
+      <li class="list-group-item">Gender: ${capitalize(user.sex)}</li>
+    </ul>
+    <div class="card-body">
+      <a href="#" class="card-link">Edit Profile</a>
+    </div>
+  </div>
   <br>
   <div class="form-group text-left">
   <input id="logout" type="submit" name="logout" class="btn btn-info btn-md" value="Log Out">
   </div>
 `
+}
+
+
+//capitalize function
+function capitalize(string){
+  let firstLetter = string[0].toUpperCase()
+  let restOfWord = string.slice(1)
+  return capitalizeWord = firstLetter + restOfWord
+}
 
 // switches page conetent
 function render(){
   switch (state.page){
+    // first page people see to log in
     case 'login':
       containerBox.innerHTML = loginPage
-      // initial buttons for login and to see register form
+      // buttons for login and register page
       const buttons = document.getElementsByClassName("btn btn-info btn-md")
       const registerMenu = buttons.register
       const loginButton = buttons.login
+      // event listeners for those buttons
       loginButton.addEventListener("click", (e) => loginFormHandler(e))
       registerMenu.addEventListener("click", (e) => registerFormAdder(e))
     break; 
     case 'register':
+      // sets html to registration page
       containerBox.innerHTML = registerPage
     break;
     case 'profile':
-      containerBox.innerHTML = profilePage
-      const logoutButton = document.getElementById('logout')
+      // calls profile page function to set profile html
+      // does this so we can get the user object
+      menuBar()
+      profilePage()
+      // menu buttons
+      profileButton = document.getElementById('profile-button')
+      searchButton = document.getElementById('search-button')
+      matchButton = document.getElementById('match-button')
+      //event listeners for menu buttons
+      searchButton.addEventListener("click", function(){
+        fetchRandomUser()
+      })
+      profileButton.addEventListener("click", function(){
+        state.page = "profile"
+       render()
+      })
+
+      
+      // logout button and event listener for the button
+      logoutButton = document.getElementById('logout')
       logoutButton.addEventListener("click", function (){
         sessionStorage.clear()
         state.page = "login" 
         render()
       })
     break;
+    // search page
+    case 'search':
+      fetchRandomUser()
+    break;
   }
 }
 
 // checks if someone is logged in
+// use parseInt bc it returns as string
 if (!!parseInt(sessionStorage.currentUserId)){
-  state.page = "profile"
-  render()
-}
+  fetch(usersUrl + sessionStorage.currentUserId)
+  .then(response => response.json())
+  .then(json => {
+    state.page = "profile"
+    user = json 
+    render()
+  });
+  } else{
+    tate.page = "login"
+    render()
+  }
 
 
 // gets values of login form
@@ -150,9 +214,11 @@ function loginFetch(email, password){
   .then(response => response.json())
   .then(json => {
     if (json.id){
+      //similar to a session ID
       sessionStorage.currentUserId = json.id
       console.log(json)
       state.page = "profile"
+      user = json 
       render()
       logoutButton = document.getElementById('logout')
       logoutButton.addEventListener("click", function (){
@@ -160,7 +226,6 @@ function loginFetch(email, password){
         state.page = "login" 
         render()
       })
-      return user = json 
     }
   })
 }
@@ -204,7 +269,7 @@ function registerFetch(email, password, owner, petName, age, about, breed, size,
     }
   }
   // create user in backend
-  fetch("http://localhost:3000/api/v1/users", {
+  fetch(usersUrl, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(userData)})
@@ -223,4 +288,62 @@ function registerFetch(email, password, owner, petName, age, about, breed, size,
       return user = json 
     }
   })
+}
+// returns random item form array
+function random_item(items){ return items[Math.floor(Math.random()*items.length)];}
+// returns random item from Object
+function randomProperty(obj){
+  let keys = Object.keys(obj);
+  return obj[keys[ keys.length * Math.random() << 0]];
+};
+// get all users from database
+function fetchRandomUser(){
+  fetch(usersUrl)
+  .then(response => response.json())
+  .then(json =>{
+    allUsers = json.user.data
+    randomUser = randomProperty(allUsers).attributes
+    console.log(randomUser)
+    state.page = "search"
+    // debugger
+    profileCard = document.getElementById("profile-card")
+    profileCard.innerHTML =`
+      <br>
+      <h1> ${capitalize(randomUser.owner)} </h1>
+      <img class="card-img-top" src="https://scontent-lga3-1.cdninstagram.com/v/t51.2885-15/e35/s1080x1080/116266925_152033579835041_6801224975812712869_n.jpg?_nc_ht=scontent-lga3-1.cdninstagram.com&_nc_cat=105&_nc_ohc=8su9FYI7zr8AX-EjwNO&oh=245a0859f445c893326b39d2be1480bf&oe=5F4BFCEA">
+      <div class="card-body">
+        <h5 class="card-title">Pup's Name: ${capitalize(randomUser.pet_name)}</h5>
+        <p class="card-text">${randomUser.about}</p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Breed: ${capitalize(randomUser.breed)}</li>
+        <li class="list-group-item">Age: ${randomUser.age}</li>
+        <li class="list-group-item">Size: ${capitalize(randomUser.size)}</li>
+        <li class="list-group-item">Gender: ${capitalize(randomUser.sex)}</li>
+      </ul>
+  </div>
+`
+  })
+}
+
+function menuBar(){
+  containerBox.innerHTML = `
+  <br>
+  <div class="menu bar" >
+  <ul class="nav nav-fill">
+      <li class="nav-item btn btn-outline-info" id = "profile-button">
+        <a class="profile"  href="#">Profile</a>
+      </li>
+      <li class="nav-item btn btn-outline-info" id="search-button">
+        <a class="search-profile"  href="#">Search</a>
+      </li>
+      <li class="nav-item btn btn-outline-info" id="matches-button">
+        <a class="matches"  href="#">Matches</a>
+      </li>
+    </ul>
+    <br>
+  </div>
+  <div class="display-card" id="display-card">
+  </div>
+  `
 }

@@ -5,7 +5,7 @@ body {
   height: 100vh;
 }
 #main .container #container-row #container-column #container-box {
-  margin-top: 10px;
+  /* margin-top: 10px; */
   max-width: 2000px;
 
   border: 1px solid #9C9C9C;
@@ -17,3 +17,4 @@ body {
 #login-form .container #login-row #login-column #login-box #login-form #register-link {
   margin-top: -85px;
 }
+
