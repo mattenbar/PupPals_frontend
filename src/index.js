@@ -100,10 +100,10 @@ function profilePage(){
       <p class="card-text">${user.about}</p>
     </div>
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Breed: ${capitalize(user.breed)}</li>
-      <li class="list-group-item">Age: ${user.age}</li>
-      <li class="list-group-item">Size: ${capitalize(user.size)}</li>
-      <li class="list-group-item">Gender: ${capitalize(user.sex)}</li>
+      <li class="list-group-item rounded">Breed: ${capitalize(user.breed)}</li>
+      <li class="list-group-item rounded">Age: ${user.age}</li>
+      <li class="list-group-item rounded">Size: ${capitalize(user.size)}</li>
+      <li class="list-group-item rounded">Gender: ${capitalize(user.sex)}</li>
     </ul>
     <div class="card-body">
       <a href="#" class="card-link">Edit Profile</a>
@@ -153,11 +153,12 @@ function render(){
       matchButton = document.getElementById('match-button')
       //event listeners for menu buttons
       searchButton.addEventListener("click", function(){
-        fetchRandomUser()
+        state.page = "search"
+        render()
       })
       profileButton.addEventListener("click", function(){
         state.page = "profile"
-       render()
+        render()
       })
 
       
@@ -303,9 +304,7 @@ function fetchRandomUser(){
   .then(json =>{
     allUsers = json.user.data
     randomUser = randomProperty(allUsers).attributes
-    console.log(randomUser)
     state.page = "search"
-    // debugger
     profileCard = document.getElementById("profile-card")
     profileCard.innerHTML =`
       <br>
@@ -316,13 +315,12 @@ function fetchRandomUser(){
         <p class="card-text">${randomUser.about}</p>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">Breed: ${capitalize(randomUser.breed)}</li>
-        <li class="list-group-item">Age: ${randomUser.age}</li>
-        <li class="list-group-item">Size: ${capitalize(randomUser.size)}</li>
-        <li class="list-group-item">Gender: ${capitalize(randomUser.sex)}</li>
+        <li class="list-group-item rounded">Breed: ${capitalize(randomUser.breed)}</li>
+        <li class="list-group-item rounded">Age: ${randomUser.age}</li>
+        <li class="list-group-item rounded">Size: ${capitalize(randomUser.size)}</li>
+        <li class="list-group-item rounded">Gender: ${capitalize(randomUser.sex)}</li>
       </ul>
-  </div>
-`
+    `
   })
 }
 
@@ -330,7 +328,7 @@ function menuBar(){
   containerBox.innerHTML = `
   <br>
   <div class="menu bar" >
-  <ul class="nav nav-fill">
+    <ul class="nav nav-fill">
       <li class="nav-item btn btn-outline-info" id = "profile-button">
         <a class="profile"  href="#">Profile</a>
       </li>
