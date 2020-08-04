@@ -159,19 +159,23 @@ function render(){
       //edit button
       editButton = document.getElementById("edit-link")
       //event listeners for menu buttons
-      searchButton.addEventListener("click", function(){
+      searchButton.addEventListener("click", function(e){
+        e.preventDefault()
         state.page = "search"
         render()
       })
-      profileButton.addEventListener("click", function(){
+      profileButton.addEventListener("click", function(e){
+        e.preventDefault()
         state.page = "profile"
         render()
       })
-      editButton.addEventListener("click", function(){
+      editButton.addEventListener("click", function(e){
+        e.preventDefault()
         state.page = 'edit'
         render()
       })
-      likeButton.addEventListener("click", function(){
+      likeButton.addEventListener("click", function(e){
+        e.preventDefault()
         state.page = 'liked-me'
         render()
       })
@@ -197,6 +201,7 @@ function render(){
       imgUploadButton.addEventListener("click", function(e){ 
         imgUploadHandler(e)
       })
+      
     break;
     case 'liked-me':
       fetchLikedMe()
@@ -371,7 +376,7 @@ function fetchRandomUser(){
 function menuBar(){
   containerBox.innerHTML = `
   <br>
-  <div class="menu bar" >
+  <div id="menu-bar" class="menu-bar" >
     <ul class="nav nav-fill">
       <li class="nav-item btn btn-outline-info" id = "profile-button">
         <a class="profile"  href="#">Profile</a>
@@ -391,6 +396,8 @@ function menuBar(){
 }
 // edit page
 function editpage(){
+  menu = document.getElementById("menu-bar")
+  menu.parentElement.removeChild(menu)
   displayCard.innerHTML=`
   <br>
   <h3 class="text-center text-info">Edit</h3>
@@ -445,6 +452,14 @@ function editpage(){
     </div>
   </form>
   `
+  searchButton2 = searchButton
+  searchButton2.addEventListener("click", function(e){
+    e.preventDefault
+    state.page = 'search'
+    render()
+  })
+
+  
 }
 // edit form hangler
 function editFormHandler(e){
