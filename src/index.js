@@ -89,6 +89,12 @@ let registerPage =`
 `
 // html for user profile
 function profilePage(){
+  fetch(`http://localhost:3000/api/v1/users/${sessionStorage.currentUserId}`)
+  .then(response => response.json())
+  .then(json => {
+    state.user = json
+  })
+
   displayCard = document.getElementById("display-card")
   displayCard.innerHTML +=`
   <div class="profile-card" id="profile-card">
@@ -182,8 +188,6 @@ function render(){
     // search page
     case 'search':
       fetchRandomUser()
-      
-      
     break;
     case 'edit':
       editpage()
@@ -192,8 +196,6 @@ function render(){
       const imgUploadButton = document.getElementById("imgUploadButton")
       imgUploadButton.addEventListener("click", function(e){ 
         imgUploadHandler(e)
-        state.page = 'profile'
-        render()
       })
     break;
     case 'liked-me':
@@ -301,12 +303,10 @@ function registerFetch(email, password, owner, petName, age, about, breed, size,
     body: JSON.stringify(userData)})
   .then(response => response.json())
   .then(json => {
-    sessionStorage.clear()
-    if (json.id){
       sessionStorage.currentUserId = json.id
       state.page = "profile"
+      state.user = json
       render()
-    }
   })
 }
 // returns random item form array
@@ -395,13 +395,13 @@ function editpage(){
   <br>
   <h3 class="text-center text-info">Edit</h3>
   <br>
-  <img class="card-img-top" src="${state.user.img}">
+  <img id="current-image" class="card-img-top" src="${state.user.img}">
   <br><br>
   <form id="edit-form" class="form" action="">
   <label for="img">Select image:</label>
   <input type="file" id="img" name="img" accept="image/*" >
   <br><br>
-  <input type="submit" id="imgUploadButton" class="btn btn-info btn-md">
+  <input type="submit" id="imgUploadButton" class="btn btn-info btn-md" value="Save Image">
   </form>
   <br><br>
   <form id="edit-form" class="form" action="" method="PUT">
@@ -443,7 +443,8 @@ function editpage(){
     <div class="form-group text-left">
       <input id="saveEdit" type="submit" name="edit" class="btn btn-info btn-md" value="Save">
     </div>
-  </form>`
+  </form>
+  `
 }
 // edit form hangler
 function editFormHandler(e){
@@ -496,6 +497,13 @@ function imgUploadHandler(e){
   fetch("http://localhost:3000/api/v1/img-upload",{
     method: "PUT",
     body
+  })
+  .then(resp => resp.json())
+  .then(json => {
+    document.getElementById("current-image").src = json.img
+    state.user = json
+    state.page = 'profile'
+    render()
   })
 }
 // gets the users that liked you
