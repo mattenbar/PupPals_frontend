@@ -182,6 +182,8 @@ function render(){
     // search page
     case 'search':
       fetchRandomUser()
+      
+      
     break;
     case 'edit':
       editpage()
@@ -214,8 +216,6 @@ if (!!parseInt(sessionStorage.currentUserId)){
     state.page = "login"
     render()
   }
-
-
 // gets values of login form
 function loginFormHandler(e) {
     e.preventDefault()
@@ -327,12 +327,23 @@ function fetchRandomUser(){
     profileCard = document.getElementById("profile-card")
     profileCard.innerHTML =`
       <br>
-      <h1> ${capitalize(randomUser.owner)} </h1>
-      <img class="card-img-top" src="${randomUser.img}">
+      <div id="name-and-image">
+        <h1> ${capitalize(randomUser.owner)} </h1>
+        <img class="card-img-top" src="${randomUser.img}">
+      </div>
+      <br>
+      <div id="thumbs-up-thumbs-down" class="row">
+        <div id="thumbs-down" class="col-sm text-center">
+          <h1>👎</h1>
+        </div>
+        <div id="thumbs-up" class="col-sm text-center">
+          <h1>👍</h1>
+        </div>
+      </div>
       <div class="card-body">
         <h5 class="card-title">Pup's Name: ${capitalize(randomUser.pet_name)}</h5>
         <p class="card-text">${randomUser.about}</p>
-      </div>
+      </>
       <ul class="list-group list-group-flush">
         <li class="list-group-item rounded">Breed: ${capitalize(randomUser.breed)}</li>
         <li class="list-group-item rounded">Age: ${randomUser.age}</li>
@@ -340,6 +351,7 @@ function fetchRandomUser(){
         <li class="list-group-item rounded">Gender: ${capitalize(randomUser.sex)}</li>
       </ul>
     `
+    document.getElementById("thumbs-down").addEventListener("click", fetchRandomUser)
   })
 }
 //top menu bar
@@ -519,4 +531,16 @@ function fetchLikedMe(){
       likedMeList.appendChild(follower)
     })
   })
+}
+function addThumbs(){
+  thumbs = `
+    <div id="thumbs-up-thumbs-down" class="row">
+        <div id="thumbs-down" class="col-sm text-center">
+          <h1>👎</h1>
+        </div>
+        <div id="thumbs-up" class="col-sm text-center">
+          <h1>👍</h1>
+        </div>
+      </div>
+  `
 }

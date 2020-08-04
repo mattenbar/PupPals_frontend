@@ -8,7 +8,7 @@ body {
   /* margin-top: 10px; */
   max-width: 2000px;
 
-  border: 1px solid #9C9C9C;
+  border: 2px solid #9C9C9C;
   background-color: #EAEAEA;
 }
 #login-form .container #login-row #login-column #login-box #login-form {
