@@ -149,7 +149,7 @@ function render(){
       // menu buttons
       profileButton = document.getElementById('profile-button')
       searchButton = document.getElementById('search-button')
-      matchButton = document.getElementById('match-button')
+      likeButton = document.getElementById('likes-button')
       //edit button
       editButton = document.getElementById("edit-link")
       //event listeners for menu buttons
@@ -161,9 +161,12 @@ function render(){
         state.page = "profile"
         render()
       })
-      editButton.addEventListener("click", function(e){
-        e.preventDefault
+      editButton.addEventListener("click", function(){
         state.page = 'edit'
+        render()
+      })
+      likeButton.addEventListener("click", function(){
+        state.page = 'liked-me'
         render()
       })
       
@@ -185,7 +188,14 @@ function render(){
       const saveButton = document.getElementById("saveEdit")
       saveButton.addEventListener("click", (e) => editFormHandler(e))
       const imgUploadButton = document.getElementById("imgUploadButton")
-      imgUploadButton.addEventListener("click", (e) => imgUploadHandler(e))
+      imgUploadButton.addEventListener("click", function(e){ 
+        imgUploadHandler(e)
+        state.page = 'profile'
+        render()
+      })
+    break;
+    case 'liked-me':
+      fetchLikedMe()
     break;
   }
 }
@@ -201,7 +211,7 @@ if (!!parseInt(sessionStorage.currentUserId)){
     render()
   });
   } else{
-    tate.page = "login"
+    state.page = "login"
     render()
   }
 
@@ -266,10 +276,11 @@ function registerFormHandler(e){
   const breedInput = document.querySelector("#breed").value
   const sizeInput = document.querySelector("#size").value
   const sexInput = document.querySelector("#sex").value
-  registerFetch(emailInput, pwInput, ownerInput, petNameInput, ageInput, aboutInput, breedInput, sizeInput, sexInput)
+  const imgInput = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+  registerFetch(emailInput, pwInput, ownerInput, petNameInput, ageInput, aboutInput, breedInput, sizeInput, sexInput, imgInput)
 }
 // sends new user to backend
-function registerFetch(email, password, owner, petName, age, about, breed, size, sex){
+function registerFetch(email, password, owner, petName, age, about, breed, size, sex, img){
   const userData = {user: {
     owner: owner,
     email: email,
@@ -279,7 +290,8 @@ function registerFetch(email, password, owner, petName, age, about, breed, size,
     breed: breed,
     size: size,
     sex: sex,
-    age: age
+    age: age,
+    img: img
     }
   }
   // create user in backend
@@ -342,8 +354,8 @@ function menuBar(){
       <li class="nav-item btn btn-outline-info" id="search-button">
         <a class="search-profile"  href="#">Search</a>
       </li>
-      <li class="nav-item btn btn-outline-info" id="matches-button">
-        <a class="matches"  href="#">Matches</a>
+      <li class="nav-item btn btn-outline-info" id="likes-button">
+        <a class="likes"  href="#">Liked Me</a>
       </li>
     </ul>
     <br>
@@ -420,6 +432,7 @@ function editFormHandler(e){
   const sexInputEdit = document.querySelector("#sex").value
   editFetch(ownerInputEdit, petNameInputEdit, ageInputEdit, aboutInputEdit, breedInputEdit, sizeInputEdit, sexInputEdit)
 }
+// edits user info
 function editFetch(owner, petName, age, about, breed, size, sex){
   userDataEdit= {
     id: state.user.id,
@@ -429,7 +442,8 @@ function editFetch(owner, petName, age, about, breed, size, sex){
     breed: breed,
     size: size,
     sex: sex,
-    age: age
+    age: age,
+    img: state.user.img
   }
 
   fetch(("http://localhost:3000/api/v1/users/" + state.user.id),{
@@ -447,7 +461,7 @@ function editFetch(owner, petName, age, about, breed, size, sex){
     render();
   })
 }
-
+// edits users photo
 function imgUploadHandler(e){
   e.preventDefault()
   const body = new FormData()
@@ -457,5 +471,52 @@ function imgUploadHandler(e){
   fetch("http://localhost:3000/api/v1/img-upload",{
     method: "PUT",
     body
-  } )
+  })
+}
+// gets the users that liked you
+function fetchLikedMe(){
+  const bodyData = {user: {
+    id: state.user.id
+    }
+  }
+  fetch("http://localhost:3000/api/v1/liked-me", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify(bodyData)
+  })
+  .then(response => response.json())
+  .then(json => {
+    state.page = 'liked-me'
+    profileCard = document.getElementById("profile-card")
+    profileCard.innerHTML =`
+    <ul class="list-group" id="liked-me-list">
+    </ul>
+    `
+    likedMeList = document.getElementById("liked-me-list")
+    likedMelUsers = json.user.data
+    likedMelUsers.forEach(function(user){
+      follower = document.createElement("li")
+      follower.className = "list-group-item"
+      follower.id = `follower_${user.id}`
+      follower.innerHTML=`
+        <div class="row">
+          <div class="fit">
+            <img src=${user.attributes.img} width="120" height="120">
+            <p class="text-center"><strong>${capitalize(user.attributes.owner)}</strong></p>
+          </div>
+          <div class="col-sm">
+            <p> 
+              Pup Name: ${capitalize(user.attributes.pet_name)}<br>
+              Pup Gender: ${capitalize(user.attributes.sex)}<br>
+              Pup Age: ${user.attributes.age}<br>
+              Pup Size: ${capitalize(user.attributes.size)}<br>
+              Pup Breed: ${capitalize(user.attributes.breed)}<br>
+              Contact ${capitalize(user.attributes.owner)} to make a puppy playdate: <strong>${user.attributes.email}</strong>
+            </p>
+          </div>
+        </div>
+      `
+      likedMeList.appendChild(follower)
+    })
+  })
 }
