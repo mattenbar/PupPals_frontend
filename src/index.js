@@ -352,6 +352,19 @@ function fetchRandomUser(){
       </ul>
     `
     document.getElementById("thumbs-down").addEventListener("click", fetchRandomUser)
+    document.getElementById("thumbs-up").addEventListener("click", function(){
+      const bodyData = {user: {
+        currentUserId: state.user.id,
+        likedUser: randomUser.email
+        }
+      }
+      fetch("http://localhost:3000/api/v1/like-user", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(bodyData)
+      })
+      fetchRandomUser()
+    })
   })
 }
 //top menu bar
@@ -531,16 +544,4 @@ function fetchLikedMe(){
       likedMeList.appendChild(follower)
     })
   })
-}
-function addThumbs(){
-  thumbs = `
-    <div id="thumbs-up-thumbs-down" class="row">
-        <div id="thumbs-down" class="col-sm text-center">
-          <h1>👎</h1>
-        </div>
-        <div id="thumbs-up" class="col-sm text-center">
-          <h1>👍</h1>
-        </div>
-      </div>
-  `
 }
